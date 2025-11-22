@@ -133,6 +133,7 @@ This playbook will restart the monitored NGINX container. It assumes Ansible is 
       when: "'target-service' in (docker_info.containers | map(attribute='name') | list)"
 ```
 5.2. The Webhook App (ansible/webhook.py)
+
 This Flask app listens for alerts, filters for critical ones, and executes the playbook.
 
 ```bash
@@ -295,6 +296,7 @@ Execute this command from the root self-healing-infra directory:
 docker-compose up -d --build
 ```
 7.2. Access Dashboards
+
 NGINX Service: http://localhost:8080
 
 Prometheus: http://localhost:9090 (Check the Status -> Targets to ensure node-exporter is UP.)
