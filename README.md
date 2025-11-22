@@ -1,4 +1,4 @@
-🛠️ Self-Healing Infrastructure Project Guide (Dockerized)
+**🛠️ Self-Healing Infrastructure Project Guide (Dockerized)**
 
 Step 1: Project Setup and Directory Structure
 First, create a clear directory structure for your project.
@@ -44,11 +44,11 @@ scrape_configs:
       - targets: ['node-exporter:9100']
 
   - job_name: 'target-service-check'
-    # Since the NGINX container doesn't have native Prometheus metrics,
-    # we'll use a Blackbox Exporter to check its HTTP status.
-    # We will skip Blackbox for this simplified guide and instead monitor the host/system metrics via Node Exporter
-    # and rely on Alertmanager to trigger for a specific **system-level** issue (CPU > 90%).
-    # For a service-down alert, we'll monitor the 'up' metric from the node-exporter scrape job.
+    Since the NGINX container doesn't have native Prometheus metrics,
+    we'll use a Blackbox Exporter to check its HTTP status.
+    We will skip Blackbox for this simplified guide and instead monitor the host/system metrics via Node Exporter
+    and rely on Alertmanager to trigger for a specific system-level issue (CPU > 90%).
+    For a service-down alert, we'll monitor the 'up' metric from the node-exporter scrape job.
     static_configs:
       - targets: ['node-exporter:9100']
 3.2. Define Alerting Rules (prometheus/alert.rules.yml)
