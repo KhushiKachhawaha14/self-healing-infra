@@ -5,12 +5,14 @@
 First, create a clear directory structure for your project.
 
 
-
+### Bash
 ```bash
 mkdir self-healing-infra
 cd self-healing-infra
 mkdir prometheus alertmanager ansible
 touch docker-compose.yml
+
+### Bash
 
 **Step 2: Define the Application to Monitor (The "Broken" Service)**
 
