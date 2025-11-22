@@ -69,7 +69,7 @@ groups:
       summary: "High CPU usage detected on Node Exporter instance {{ $labels.instance }}"
       description: "CPU utilization is over 5% on {{ $labels.instance }}. Restarting the problematic service."
 
-  # Simple rule to check if the node-exporter is down (which implies an issue with the host/container)
+   Simple rule to check if the node-exporter is down (which implies an issue with the host/container)
   - alert: NodeExporterDown
     expr: up{job="node-exporter"} == 0
     for: 1m
