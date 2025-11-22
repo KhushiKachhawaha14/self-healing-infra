@@ -1,0 +1,25 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  - job_name: 'target-service-check'
+    static_configs:
+      - targets: ['node-exporter:9100']
+      # Append this to the END of your existing configuration:
+
+rule_files:
+  - 'alert.rules.yml' # 1. Tells Prometheus where to find your alert definitions
+
+alerting:
+  alertmanagers:
+  - static_configs:
+    # 2. Tells Prometheus where to send the alerts (Alertmanager service name and port)
+    - targets: ['alertmanager:9093']

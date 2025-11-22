@@ -1,0 +1,23 @@
+---
+# File: restart_service.yml
+- name: Restart node-exporter container for self-healing
+  hosts: localhost_group
+  gather_facts: no
+  
+  vars:
+    # Use the 'service_name' variable passed from the Flask webhook 
+    # and default to 'node-exporter' if not explicitly provided.
+    container_to_manage: "{{ service_name | default('node-exporter') }}"
+
+  tasks:
+    - name: Restart the Docker container on the Host Machine
+      # This module correctly communicates with the host's Docker daemon via the mounted socket.
+      community.docker.docker_container: 
+        name: "{{ container_to_manage }}"
+        state: started
+        restart: yes  # Forces a restart if the container is running, or starts it if stopped.
+      register: container_restart_result # Used a clean variable name to fix the previous error
+      
+    - name: Check if the restart was successful
+      ansible.builtin.debug:
+        msg: "Container '{{ container_to_manage }}' successfully restarted. Changes made: {{ container_restart_result.changed }}"

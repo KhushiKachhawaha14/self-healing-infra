@@ -1,0 +1,23 @@
+groups:
+- name: ServiceAlerts
+  rules:
+  - alert: HighCpuUsage
+    expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 5
+    for: 1m
+    labels:
+      severity: warning
+      team: infra
+    annotations:
+      summary: "High CPU usage detected on Node Exporter instance {{ $labels.instance }}"
+      description: "CPU utilization is over 5% on {{ $labels.instance }}. Restarting the problematic service."
+
+  # Simple rule to check if the node-exporter is down (which implies an issue with the host/container)
+  - alert: NodeExporterDown
+    expr: up{job="node-exporter"} == 0
+    for: 1m
+    labels:
+      severity: critical
+      team: infra
+    annotations:
+      summary: "Node Exporter is down"
+      description: "Node Exporter instance {{ $labels.instance }} is not responding. Service healing required."
