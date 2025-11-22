@@ -4,6 +4,14 @@
 
 First, create a clear directory structure for your project.
 
+### Bash
+
+```bash
+mkdir self-healing-infra
+cd self-healing-infra
+mkdir prometheus alertmanager ansible
+touch docker-compose.yml
+
 Bash
 
 mkdir self-healing-infra
