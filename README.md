@@ -4,7 +4,6 @@
 
 First, create a clear directory structure for your project.
 
-### Bash
 ```bash
 mkdir self-healing-infra
 cd self-healing-infra
@@ -22,10 +21,7 @@ For Prometheus to monitor this container, we need an exporter. The Prometheus No
 
 Create a simple nginx-service directory and a placeholder HTML file.
 
-### Bash
-
 ```bash
-
 mkdir nginx-service
 echo "<h1>Hello from the monitored service!</h1>" > nginx-service/index.html
 ```
@@ -37,10 +33,6 @@ Prometheus needs a configuration file to know which services to scrape for metri
 
 3.1. Prometheus Configuration (prometheus/prometheus.yml)
 Create the following file to scrape its own metrics and the Node Exporter's metrics. Note the use of service names (node-exporter and target-service) as hostnames, which Docker Compose resolves automatically.
-
-
-
-
 ```bash
 YAML
 
@@ -310,10 +302,7 @@ services:
 7.1. Start the System
 Execute this command from the root self-healing-infra directory:
 
-### Bash
-
 ```bash
-
 docker-compose up -d --build
 ```
 7.2. Access Dashboards
@@ -326,10 +315,7 @@ Alertmanager: http://localhost:9093
 7.3. Simulate a Failure (Testing the NodeExporterDown Alert)
 The simplest way to trigger a "healing" alert is to stop the Node Exporter, which will cause the NodeExporterDown alert to fire.
 
-### Bash
-
 ```bash
-
 # Stop the Node Exporter
 docker stop node-exporter
 ```
@@ -339,7 +325,6 @@ Prometheus: Check the Alerts tab. The NodeExporterDown alert should show as FIRI
 Ansible Webhook Logs: Watch the logs for the Ansible service. You should see it receive the alert and trigger the playbook:
 
 ```bash
-
 docker logs -f ansible-webhook-service
 ```
 You should see output similar to: !!! FIRING ALERT: NodeExporterDown !!! followed by >>> Executing Ansible Playbook to self-heal....
@@ -350,7 +335,6 @@ Healing Result: The Ansible playbook will attempt to restart the target-service 
 When finished, shut down and remove the containers:
 
 ```bash
-
 docker-compose down -v
 ```
 This project successfully integrates monitoring, alerting, and automation for a powerful Self-Healing Infrastructure.
