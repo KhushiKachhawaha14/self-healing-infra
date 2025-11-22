@@ -302,6 +302,7 @@ Prometheus: http://localhost:9090 (Check the Status -> Targets to ensure node-ex
 Alertmanager: http://localhost:9093
 
 7.3. Simulate a Failure (Testing the NodeExporterDown Alert)
+
 The simplest way to trigger a "healing" alert is to stop the Node Exporter, which will cause the NodeExporterDown alert to fire.
 
 ```bash
@@ -309,6 +310,7 @@ The simplest way to trigger a "healing" alert is to stop the Node Exporter, whic
 docker stop node-exporter
 ```
 7.4. Observe Auto-Healing in Action
+
 Prometheus: Check the Alerts tab. The NodeExporterDown alert should show as FIRING.
 
 Ansible Webhook Logs: Watch the logs for the Ansible service. You should see it receive the alert and trigger the playbook:
@@ -326,4 +328,4 @@ When finished, shut down and remove the containers:
 ```bash
 docker-compose down -v
 ```
-This project successfully integrates monitoring, alerting, and automation for a powerful Self-Healing Infrastructure.
+
