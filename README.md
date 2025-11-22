@@ -4,7 +4,7 @@
 
 First, create a clear directory structure for your project.
 
-
+```markdown
 ### Bash
 ```bash
 mkdir self-healing-infra
