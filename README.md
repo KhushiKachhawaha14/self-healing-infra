@@ -56,6 +56,7 @@ scrape_configs:
       - targets: ['node-exporter:9100']
 ```
 3.2. Define Alerting Rules (prometheus/alert.rules.yml)
+
 This file tells Prometheus when to generate an alert and send it to Alertmanager.
 
 ```bash
