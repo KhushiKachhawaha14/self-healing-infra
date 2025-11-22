@@ -1,6 +1,6 @@
-**🛠️ Self-Healing Infrastructure Project Guide (Dockerized)**
+# *🛠️ Self-Healing Infrastructure Project Guide (Dockerized)*
 
-Step 1: Project Setup and Directory Structure
+**Step 1: Project Setup and Directory Structure**
 First, create a clear directory structure for your project.
 
 Bash
@@ -9,7 +9,8 @@ mkdir self-healing-infra
 cd self-healing-infra
 mkdir prometheus alertmanager ansible
 touch docker-compose.yml
-Step 2: Define the Application to Monitor (The "Broken" Service)
+
+**Step 2: Define the Application to Monitor (The "Broken" Service)**
 We'll use a simple NGINX container as the service to monitor and "heal."
 
 2.1. The "Problem" Service (nginx-service/Dockerfile)
@@ -23,7 +24,7 @@ mkdir nginx-service
 echo "<h1>Hello from the monitored service!</h1>" > nginx-service/index.html
 We will monitor this service using cAdvisor (Container Advisor, a component included in many setups) or simply check if the container is running and accessible.
 
-Step 3: Configure Prometheus and Node Exporter
+**Step 3: Configure Prometheus and Node Exporter**
 Prometheus needs a configuration file to know which services to scrape for metrics.
 
 3.1. Prometheus Configuration (prometheus/prometheus.yml)
@@ -81,7 +82,7 @@ groups:
       description: "Node Exporter instance {{ $labels.instance }} is not responding. Service healing required."
 Note: I've set the CPU threshold to 5% for testing purposes, as a real Docker environment might not easily reach 90% utilization on a simple NGINX service.
 
-Step 4: Configure Alertmanager and the Webhook
+**Step 4: Configure Alertmanager and the Webhook**
 Alertmanager receives alerts from Prometheus and sends them to the appropriate receiver (in this case, an Ansible-triggering script).
 
 4.1. Alertmanager Configuration (alertmanager/config.yml)
@@ -105,7 +106,8 @@ receivers:
   - url: 'http://ansible-webhook-service:5000/alert' # Must match the Ansible webhook service name and port
     send_resolved: true
     max_alerts: 0
-Step 5: Create the Ansible Webhook and Playbook
+
+**Step 5: Create the Ansible Webhook and Playbook**
 This is the "healing" component. We'll use a tiny Python Flask app to act as the webhook receiver and trigger the Ansible playbook.
 
 5.1. The Ansible Playbook (ansible/restart_service.yml)
@@ -178,17 +180,17 @@ if __name__ == '__main__':
 5.3. Dockerfile for Ansible Webhook (ansible/Dockerfile)
 Dockerfile
 
-# Use a base image with Python
+ Use a base image with Python
 FROM python:3.9-slim
 
-# Install Ansible and necessary Python dependencies
+ Install Ansible and necessary Python dependencies
 RUN apt-get update && apt-get install -y \
     ansible \
     git \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Install python modules for Ansible and Flask
+ Install python modules for Ansible and Flask
 RUN pip install Flask 'ansible-core==2.16.5' 'community.docker'
 
 WORKDIR /app
@@ -198,7 +200,7 @@ COPY restart_service.yml .
 
 EXPOSE 5000
 
-# Command to run the Flask app
+ Command to run the Flask app
 CMD ["python", "webhook.py"]
 Step 6: The docker-compose.yml File
 This orchestrates all the services: Prometheus, Alertmanager, Node Exporter, the NGINX service, and the Ansible webhook.
@@ -208,7 +210,7 @@ YAML
 version: '3.7'
 
 services:
-  # 1. Target Service (NGINX)
+   1. Target Service (NGINX)
   target-service:
     image: nginx:latest
     container_name: target-service
@@ -218,7 +220,7 @@ services:
       - "8080:80"
     restart: always
 
-  # 2. Node Exporter (Monitors the host's system metrics like CPU)
+   2. Node Exporter (Monitors the host's system metrics like CPU)
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
@@ -226,7 +228,7 @@ services:
     network_mode: host 
     restart: always
 
-  # 3. Prometheus Server
+   3. Prometheus Server
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -247,7 +249,7 @@ services:
       - alertmanager
     restart: always
 
-  # 4. Alertmanager
+   4. Alertmanager
   alertmanager:
     image: prom/alertmanager:latest
     container_name: alertmanager
@@ -264,7 +266,7 @@ services:
       - ansible-webhook-service
     restart: always
 
-  # 5. Ansible Webhook Service (The "Healing" Action)
+   5. Ansible Webhook Service (The "Healing" Action)
   ansible-webhook-service:
     build:
       context: ./ansible
@@ -279,7 +281,8 @@ services:
     environment:
       - DOCKER_HOST=unix:///var/run/docker.sock
     restart: always
-Step 7: Execution and Testing
+
+**Step 7: Execution and Testing**
 7.1. Start the System
 Execute this command from the root self-healing-infra directory:
 
