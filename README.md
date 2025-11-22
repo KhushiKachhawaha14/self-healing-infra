@@ -12,8 +12,8 @@ cd self-healing-infra
 mkdir prometheus alertmanager ansible
 touch docker-compose.yml
 
-Bash
-
+**###** **Bash**
+```bash
 mkdir self-healing-infra
 cd self-healing-infra
 mkdir prometheus alertmanager ansible
