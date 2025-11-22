@@ -4,7 +4,6 @@
 
 First, create a clear directory structure for your project.
 
-```markdown
 ### Bash
 ```bash
 mkdir self-healing-infra
@@ -12,7 +11,7 @@ cd self-healing-infra
 mkdir prometheus alertmanager ansible
 touch docker-compose.yml
 
-### Bash
+```
 
 **Step 2: Define the Application to Monitor (The "Broken" Service)**
 
@@ -29,6 +28,7 @@ Create a simple nginx-service directory and a placeholder HTML file.
 
 mkdir nginx-service
 echo "<h1>Hello from the monitored service!</h1>" > nginx-service/index.html
+```
 We will monitor this service using cAdvisor (Container Advisor, a component included in many setups) or simply check if the container is running and accessible.
 
 **Step 3: Configure Prometheus and Node Exporter**
@@ -39,7 +39,7 @@ Prometheus needs a configuration file to know which services to scrape for metri
 Create the following file to scrape its own metrics and the Node Exporter's metrics. Note the use of service names (node-exporter and target-service) as hostnames, which Docker Compose resolves automatically.
 
 
-### Bash
+
 
 ```bash
 YAML
@@ -64,10 +64,9 @@ scrape_configs:
     For a service-down alert, we'll monitor the 'up' metric from the node-exporter scrape job.
     static_configs:
       - targets: ['node-exporter:9100']
+```
 3.2. Define Alerting Rules (prometheus/alert.rules.yml)
 This file tells Prometheus when to generate an alert and send it to Alertmanager.
-
-### Bash
 
 ```bash
 YAML
@@ -96,15 +95,13 @@ groups:
       summary: "Node Exporter is down"
       description: "Node Exporter instance {{ $labels.instance }} is not responding. Service healing required."
 Note: I've set the CPU threshold to 5% for testing purposes, as a real Docker environment might not easily reach 90% utilization on a simple NGINX service.
-
+```
 **Step 4: Configure Alertmanager and the Webhook**
 
 Alertmanager receives alerts from Prometheus and sends them to the appropriate receiver (in this case, an Ansible-triggering script).
 
 4.1. Alertmanager Configuration (alertmanager/config.yml)
-The configuration defines a receiver that points to our Ansible webhook service.
-
-### Bash
+The configuration defines a receiver that points to our Ansible webhook service
 
 ```bash
 YAML
@@ -125,15 +122,13 @@ receivers:
   - url: 'http://ansible-webhook-service:5000/alert' # Must match the Ansible webhook service name and port
     send_resolved: true
     max_alerts: 0
-
+```
 **Step 5: Create the Ansible Webhook and Playbook**
 
 This is the "healing" component. We'll use a tiny Python Flask app to act as the webhook receiver and trigger the Ansible playbook.
 
 5.1. The Ansible Playbook (ansible/restart_service.yml)
 This playbook will restart the monitored NGINX container. It assumes Ansible is run from inside a container with access to the host's Docker socket to control other containers.
-
-### Bash
 
 ```bash
 YAML
@@ -152,10 +147,9 @@ YAML
         name: target-service
         state: restarted
       when: "'target-service' in (docker_info.containers | map(attribute='name') | list)"
+```
 5.2. The Webhook App (ansible/webhook.py)
 This Flask app listens for alerts, filters for critical ones, and executes the playbook.
-
-### Bash
 
 ```bash
 Python
@@ -203,13 +197,11 @@ def receive_alert():
 if __name__ == '__main__':
     # Flask app is running on port 5000 inside the container
     app.run(host='0.0.0.0', port=5000)
+```
 5.3. Dockerfile for Ansible Webhook (ansible/Dockerfile)
 Dockerfile
 
-### Bash
-
 ```bash
-
  Use a base image with Python
 FROM python:3.9-slim
 
@@ -232,11 +224,12 @@ EXPOSE 5000
 
  Command to run the Flask app
 CMD ["python", "webhook.py"]
-Step 6: The docker-compose.yml File
+```
+### Step 6: The docker-compose.yml File
 This orchestrates all the services: Prometheus, Alertmanager, Node Exporter, the NGINX service, and the Ansible webhook.
 
+```bash
 YAML
-
 version: '3.7'
 
 services:
@@ -311,7 +304,7 @@ services:
     environment:
       - DOCKER_HOST=unix:///var/run/docker.sock
     restart: always
-
+```
 **Step 7: Execution and Testing**
 
 7.1. Start the System
@@ -322,6 +315,7 @@ Execute this command from the root self-healing-infra directory:
 ```bash
 
 docker-compose up -d --build
+```
 7.2. Access Dashboards
 NGINX Service: http://localhost:8080
 
@@ -338,16 +332,16 @@ The simplest way to trigger a "healing" alert is to stop the Node Exporter, whic
 
 # Stop the Node Exporter
 docker stop node-exporter
+```
 7.4. Observe Auto-Healing in Action
 Prometheus: Check the Alerts tab. The NodeExporterDown alert should show as FIRING.
 
 Ansible Webhook Logs: Watch the logs for the Ansible service. You should see it receive the alert and trigger the playbook:
 
-### Bash
-
 ```bash
 
 docker logs -f ansible-webhook-service
+```
 You should see output similar to: !!! FIRING ALERT: NodeExporterDown !!! followed by >>> Executing Ansible Playbook to self-heal....
 
 Healing Result: The Ansible playbook will attempt to restart the target-service (NGINX), demonstrating that the healing mechanism works. You can adapt the playbook to restart the failed service (e.g., in a real-world scenario, the action might be more complex than just restarting the NGINX).
@@ -355,7 +349,8 @@ Healing Result: The Ansible playbook will attempt to restart the target-service 
 7.5. Clean Up
 When finished, shut down and remove the containers:
 
-Bash
+```bash
 
 docker-compose down -v
+```
 This project successfully integrates monitoring, alerting, and automation for a powerful Self-Healing Infrastructure.
