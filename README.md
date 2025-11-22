@@ -4,7 +4,7 @@
 
 First, create a clear directory structure for your project.
 
-### Bash
+
 
 ```bash
 mkdir self-healing-infra
