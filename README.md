@@ -1,6 +1,7 @@
 # *🛠️ Self-Healing Infrastructure Project Guide (Dockerized)*
 
 **Step 1: Project Setup and Directory Structure**
+
 First, create a clear directory structure for your project.
 
 Bash
@@ -11,6 +12,7 @@ mkdir prometheus alertmanager ansible
 touch docker-compose.yml
 
 **Step 2: Define the Application to Monitor (The "Broken" Service)**
+
 We'll use a simple NGINX container as the service to monitor and "heal."
 
 2.1. The "Problem" Service (nginx-service/Dockerfile)
@@ -25,6 +27,7 @@ echo "<h1>Hello from the monitored service!</h1>" > nginx-service/index.html
 We will monitor this service using cAdvisor (Container Advisor, a component included in many setups) or simply check if the container is running and accessible.
 
 **Step 3: Configure Prometheus and Node Exporter**
+
 Prometheus needs a configuration file to know which services to scrape for metrics.
 
 3.1. Prometheus Configuration (prometheus/prometheus.yml)
@@ -83,6 +86,7 @@ groups:
 Note: I've set the CPU threshold to 5% for testing purposes, as a real Docker environment might not easily reach 90% utilization on a simple NGINX service.
 
 **Step 4: Configure Alertmanager and the Webhook**
+
 Alertmanager receives alerts from Prometheus and sends them to the appropriate receiver (in this case, an Ansible-triggering script).
 
 4.1. Alertmanager Configuration (alertmanager/config.yml)
@@ -108,6 +112,7 @@ receivers:
     max_alerts: 0
 
 **Step 5: Create the Ansible Webhook and Playbook**
+
 This is the "healing" component. We'll use a tiny Python Flask app to act as the webhook receiver and trigger the Ansible playbook.
 
 5.1. The Ansible Playbook (ansible/restart_service.yml)
@@ -283,6 +288,7 @@ services:
     restart: always
 
 **Step 7: Execution and Testing**
+
 7.1. Start the System
 Execute this command from the root self-healing-infra directory:
 
