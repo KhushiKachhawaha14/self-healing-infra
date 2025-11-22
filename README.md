@@ -34,8 +34,6 @@ Prometheus needs a configuration file to know which services to scrape for metri
 3.1. Prometheus Configuration (prometheus/prometheus.yml)
 Create the following file to scrape its own metrics and the Node Exporter's metrics. Note the use of service names (node-exporter and target-service) as hostnames, which Docker Compose resolves automatically.
 ```bash
-YAML
-
 global:
   scrape_interval: 15s
 
@@ -61,8 +59,6 @@ scrape_configs:
 This file tells Prometheus when to generate an alert and send it to Alertmanager.
 
 ```bash
-YAML
-
 groups:
 - name: ServiceAlerts
   rules:
@@ -96,8 +92,6 @@ Alertmanager receives alerts from Prometheus and sends them to the appropriate r
 The configuration defines a receiver that points to our Ansible webhook service
 
 ```bash
-YAML
-
 global:
   resolve_timeout: 5m
 
@@ -123,8 +117,6 @@ This is the "healing" component. We'll use a tiny Python Flask app to act as the
 This playbook will restart the monitored NGINX container. It assumes Ansible is run from inside a container with access to the host's Docker socket to control other containers.
 
 ```bash
-YAML
-
 - name: Restart Monitored Service Container
   hosts: localhost
   gather_facts: no
@@ -144,8 +136,6 @@ YAML
 This Flask app listens for alerts, filters for critical ones, and executes the playbook.
 
 ```bash
-Python
-
 from flask import Flask, request, jsonify
 import subprocess
 import json
@@ -221,7 +211,6 @@ CMD ["python", "webhook.py"]
 This orchestrates all the services: Prometheus, Alertmanager, Node Exporter, the NGINX service, and the Ansible webhook.
 
 ```bash
-YAML
 version: '3.7'
 
 services:
