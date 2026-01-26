@@ -11,7 +11,6 @@ mkdir prometheus alertmanager ansible
 touch docker-compose.yml
 
 ```
-
 **Step 2: Define the Application to Monitor (The "Broken" Service)**
 
 We'll use a simple NGINX container as the service to monitor and "heal."
