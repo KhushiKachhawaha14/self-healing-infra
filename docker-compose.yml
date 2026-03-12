@@ -10,11 +10,16 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./prometheus/alert.rules.yml:/etc/prometheus/alert.rules.yml
+      - prometheus-data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--web.listen-address=:9090'
+      - '--storage.tsdb.retention.time=7d'
+    depends_on:
+      - node-exporter
+      - alertmanager
     restart: always
-    
+
   # ----------------------------------------
   # 2. Alertmanager
   # ----------------------------------------
@@ -25,11 +30,12 @@ services:
       - "9093:9093"
     volumes:
       - ./alertmanager/config.yml:/etc/alertmanager/config.yml
-      # The Alertmanager data directory is needed for persistence
       - ./alertmanager-data:/alertmanager
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--web.listen-address=:9093'
+    depends_on:
+      - ansible-webhook-service
     restart: always
 
   # ----------------------------------------
@@ -40,7 +46,6 @@ services:
     container_name: node-exporter
     ports:
       - "9100:9100"
-    # Essential for accessing host metrics
     pid: host
     volumes:
       - /:/host:ro
@@ -50,27 +55,80 @@ services:
 
   # ----------------------------------------
   # 4. Ansible Webhook Service (Self-Healing Logic)
-  #    This service is running the Flask app and Ansible.
   # ----------------------------------------
   ansible-webhook-service:
-    # Use the build context where your Dockerfile, webhook.py, and Ansible playbook are located
     build:
-      context: ./ansible 
+      context: ./ansible
       dockerfile: Dockerfile
     container_name: ansible-webhook-service
-    # CRITICAL: Ensure volumes are correctly indented (2 spaces from service name, then 2 spaces for the list items)
     volumes:
-  # Mount the Docker socket (this is fine)
       - /var/run/docker.sock:/var/run/docker.sock
       - ./ansible/restart_service.yml:/app/restart_service.yml
-      - ./ansible/webhook.py:/app/webhook.py              
-    user: root # Run as root to access /var/run/docker.sock (necessary for Docker-in-Docker functionality)
+      - ./ansible/webhook.py:/app/webhook.py
+      - healing-logs:/app/logs
+    user: root
     ports:
-      # Expose the Flask port (5000 inside container) to the host (5001 on host for Alertmanager config)
       - "5001:5000"
     environment:
-      # Required for Ansible's Docker module to connect to the host's Docker daemon
       - DOCKER_HOST=unix:///var/run/docker.sock
-      # Placeholder for Slack notifications (replace with your actual URL)
-      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: always
+
+  # ----------------------------------------
+  # 5. Grafana (Visualization Dashboard)
+  # ----------------------------------------
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    depends_on:
+      - prometheus
+    restart: always
+
+  # ----------------------------------------
+  # 6. Loki (Log Aggregation)
+  # ----------------------------------------
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: always
+
+  # ----------------------------------------
+  # 7. Promtail (Log Collector → sends to Loki)
+  # ----------------------------------------
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    volumes:
+      - /var/log:/var/log:ro
+      - ./promtail-config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    restart: always
+
+# ----------------------------------------
+# Named Volumes (persistent data)
+# ----------------------------------------
+volumes:
+  prometheus-data:
+  grafana-data:
+  loki-data:
+  healing-logs:
