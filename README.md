@@ -233,7 +233,7 @@ The Ansible container needs to control sibling containers (restart `node-exporte
 
 ## 🔗 Related Projects
 
-- [☁️ Cloud-Native Monitoring App on AWS EKS](https://github.com/KhushiKachhawaha14/cloud-native-monitoring-app)
+- [☁️ Cloud-Native Monitoring App on AWS EKS] (https://github.com/KhushiKachhawaha14/cloud-native-monitoring-app).
 - [🚀 Full Stack Django Deployment Pipeline (Terraform + GitHub Actions)] (https://github.com/KhushiKachhawaha14/Full-Stack-Django-Deployment-Pipeline).
 ---
 
