@@ -19,7 +19,7 @@ WORKDIR /app
 # Install Python dependencies: Ansible, Flask, and the required Python Docker library
 # **CRITICAL FIX:** Added the 'docker' package
 # Pinning Ansible version as requested
-RUN pip install --no-cache-dir --default-timeout=300 ansible==7.7.0 Flask 'docker>=6.0.0'
+RUN pip install --no-cache-dir --default-timeout=300 ansible==7.7.0 Flask requests 'docker>=6.0.0'
 # Install the necessary Ansible collection for Docker management
 RUN ansible-galaxy collection install community.docker
 
