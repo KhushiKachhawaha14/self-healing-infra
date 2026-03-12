@@ -117,7 +117,7 @@ No human. No pager. No 3AM wake-up.
 *Alertmanager routing NodeExporterDown → ansible-webhook receiver with severity=critical*
 
 ### 5. ✅ Self-Healing Success — MTTR: 5.38 Seconds
-![Webhook Healing Log](Output/webhook-healing-success-mttr-5s.png)
+![Webhook Healing Log](Output/webhook-healing-successmttr-5s.png)
 *Webhook history showing complete healing cycle: alert received → Ansible triggered → service restarted → MTTR: 5.38s*
 
 ### 6. Prometheus Confirming Recovery
