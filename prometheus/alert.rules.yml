@@ -8,10 +8,9 @@ groups:
       severity: warning
       team: infra
     annotations:
-      summary: "High CPU usage detected on Node Exporter instance {{ $labels.instance }}"
-      description: "CPU utilization is over 5% on {{ $labels.instance }}. Restarting the problematic service."
+      summary: "High CPU usage detected on {{ $labels.instance }}"
+      description: "CPU utilization is over 5% on {{ $labels.instance }}. Auto-remediation triggered."
 
-  # Simple rule to check if the node-exporter is down (which implies an issue with the host/container)
   - alert: NodeExporterDown
     expr: up{job="node-exporter"} == 0
     for: 1m
@@ -21,3 +20,24 @@ groups:
     annotations:
       summary: "Node Exporter is down"
       description: "Node Exporter instance {{ $labels.instance }} is not responding. Service healing required."
+
+  - alert: HighDiskUsage
+    expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 10
+    for: 1m
+    labels:
+      severity: warning
+      team: infra
+    annotations:
+      summary: "Disk usage above 90% on {{ $labels.instance }}"
+      description: "Available disk space is below 10% on {{ $labels.instance }}. Cleanup triggered."
+
+  - alert: HighMemoryUsage
+    expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 < 10
+    for: 1m
+    labels:
+      severity: warning
+      team: infra
+    annotations:
+      summary: "Memory usage above 90% on {{ $labels.instance }}"
+      description: "Available memory is below 10% on {{ $labels.instance }}. Service restart triggered."
+
